@@ -70,6 +70,15 @@ a {
   text-align: center;
 }
 
+.venue {
+  color: #d32f2f;
+  font-family: 'Google Sans', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: -0.5rem auto 1.1rem;
+}
+
 .authors,
 .affiliation,
 .author-note {
@@ -358,6 +367,10 @@ a {
 
   .publication-title {
     font-size: 1.65rem;
+  }
+
+  .venue {
+    font-size: 1.15rem;
   }
 
   .method-grid,
