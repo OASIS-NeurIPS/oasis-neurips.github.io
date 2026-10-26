@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="OASIS aligns observation and action spaces through camera-frame SE(3) trajectory prediction for robotic manipulation.">
+  <meta name="keywords" content="OASIS, robotic manipulation, vision-language-action, SE(3), trajectory prediction">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OASIS: Observation-Action Space Alignment via SE(3) Trajectory Prediction</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script defer src="./static/js/index.js"></script>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script"></script>
+</head>
+<body>
+<nav class="navbar project-nav" role="navigation" aria-label="main navigation">
+  <div class="container">
+    <div class="navbar-brand">
+      <a class="navbar-item project-mark" href="#top">OASIS</a>
+      <button class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="project-navbar">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </button>
+    </div>
+    <div id="project-navbar" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="#abstract">Abstract</a>
+        <a class="navbar-item" href="#method">Method</a>
+        <a class="navbar-item" href="#results">Results</a>
+        <a class="navbar-item" href="#demos">Demos</a>
+        <a class="navbar-item" href="#bibtex">BibTeX</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main id="top">
+  <section class="hero project-hero">
+    <div class="hero-body">
+      <div class="container is-max-widescreen">
+        <div class="hero-copy">
+          <p class="eyebrow">Robotic Manipulation</p>
+          <h1 class="title publication-title">OASIS: Observation-Action Space Alignment via \(SE(3)\) Trajectory Prediction for Robotic Manipulation</h1>
+          <p class="authors">
+            Xinzhe Chen<sup>*</sup>, Sihua Ren<sup>*</sup>, Liqi Huang, Haowen Sun, Mingyang Li,
+            Xingyu Chen, Zeyang Liu, Xuguang Lan<sup>&dagger;</sup>
+          </p>
+          <p class="affiliation">
+            National Key Laboratory of Human-Machine Hybrid Augmented Intelligence<br>
+            Institute of Artificial Intelligence and Robotics, Xi'an Jiaotong University
+          </p>
+          <p class="author-note"><sup>*</sup>Equal contribution. <sup>&dagger;</sup>Corresponding author.</p>
+          <div class="publication-links">
+            <a href="#demos" class="button is-dark is-rounded">
+              <span class="icon"><i class="fas fa-play-circle"></i></span>
+              <span>Demos</span>
+            </a>
+            <a href="https://arxiv.org/abs/2605.25829" class="button is-dark is-rounded">
+              <span class="icon"><i class="fas fa-file-alt"></i></span>
+              <span>Paper</span>
+            </a>
+            <!-- <a href="https://github.com/OASIS2026/oasis" class="button is-dark is-rounded">
+              <span class="icon"><i class="fab fa-github"></i></span>
+              <span>Code</span>
+            </a> -->
+            <span class="button is-light is-rounded is-static">
+              <span class="icon"><i class="fab fa-github"></i></span>
+              <span>Code coming soon</span>
+            </span>
+          </div>
+        </div>
+        <figure class="hero-figure">
+          <img src="./static/images/paper/comparison.png" alt="Comparison of existing visuomotor policies and OASIS">
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="abstract">
+    <div class="container is-max-desktop">
+      <h2 class="title section-title">Abstract</h2>
+      <div class="content abstract-text">
+        <p>
+          Recent vision-language-action (VLA) models and world action models (WAMs)
+          advance robotic manipulation by enriching intermediate representations with
+          auxiliary spatial features or future visual-state prediction. However, these
+          representations largely remain within the observation space and do not share
+          the rigid-body geometry of the action space, forcing the action decoder to
+          implicitly recover this geometry.
+        </p>
+        <p>
+          OASIS aligns the intermediate representation with the action space through
+          \(SE(3)\) end-effector trajectory prediction. It couples a 3D-aware feature
+          encoder that fuses vision-language and metric-depth features with a camera-frame
+          \(SE(3)\) trajectory predictor. Conditioned on the predictor's pose-supervised
+          hidden states, the action decoder generates action chunks consistent with
+          rigid-body motion.
+        </p>
+        <p>
+          Across simulation and real-world experiments, OASIS outperforms VLA and WAM
+          baselines in success rate and out-of-distribution generalization.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-muted" id="method">
+    <div class="container is-max-widescreen">
+      <h2 class="title section-title">Method</h2>
+      <figure class="paper-figure">
+        <img src="./static/images/paper/method_overview.png" alt="OASIS method overview">
+        <figcaption>
+          OASIS uses a 3D-aware feature encoder, predicts a camera-frame \(SE(3)\) end-effector trajectory,
+          and decodes executable 6-DoF action chunks from the pose-supervised hidden states.
+        </figcaption>
+      </figure>
+      <div class="method-grid">
+        <div class="method-step">
+          <span class="step-index">1</span>
+          <h3>3D-Aware Feature Encoder</h3>
+          <p>Fuses Qwen2.5-based vision-language features with frozen Depth Anything 3 metric-depth features.</p>
+        </div>
+        <div class="method-step">
+          <span class="step-index">2</span>
+          <h3>\(SE(3)\) Trajectory Predictor</h3>
+          <p>Predicts a camera-frame \(SE(3)\) end-effector trajectory that provides pose-supervised hidden states for action decoding.</p>
+        </div>
+        <div class="method-step">
+          <span class="step-index">3</span>
+          <h3>Action Decoder</h3>
+          <p>Cross-attends to the pose-supervised trajectory states and current robot state to produce action chunks.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="results">
+    <div class="container is-max-widescreen">
+      <h2 class="title section-title">Results</h2>
+
+      <div class="result-block">
+        <div class="section-heading">
+          <h3>Simulation Benchmarks</h3>
+          <p>OASIS is trained without large-scale robotic pretraining and evaluated on LIBERO and CALVIN ABC\(\to\)D.</p>
+        </div>
+        <div class="benchmark-tables">
+          <div class="benchmark-table">
+            <div class="table-wrap">
+              <table class="table is-fullwidth result-table">
+                <caption>LIBERO</caption>
+                <thead>
+                  <tr>
+                    <th>Method</th>
+                    <th>Intermediate</th>
+                    <th>Pretrain</th>
+                    <th>Spatial</th>
+                    <th>Object</th>
+                    <th>Goal</th>
+                    <th>Long</th>
+                    <th>Avg.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>SpatialVLA</td><td>Spatial features</td><td>Yes</td><td>88.2</td><td>89.9</td><td>78.6</td><td>55.5</td><td>78.1</td></tr>
+                  <tr><td>WorldVLA</td><td>Future visual states</td><td>No</td><td>85.6</td><td>89.0</td><td>82.6</td><td>59.0</td><td>79.1</td></tr>
+                  <tr><td>ThinkAct</td><td>2D-supervised features</td><td>Yes</td><td>88.3</td><td>91.4</td><td>87.1</td><td>70.9</td><td>84.4</td></tr>
+                  <tr><td>\(\pi_0\)</td><td>Multimodal features</td><td>Yes</td><td>96.8</td><td><strong>98.8</strong></td><td>95.8</td><td>85.2</td><td>94.1</td></tr>
+                  <tr><td>QDepth-VLA</td><td>Spatial features</td><td>Yes</td><td>97.6</td><td>96.6</td><td>95.2</td><td>90.0</td><td>94.9</td></tr>
+                  <tr><td>UniVLA</td><td>Spatial features</td><td>Yes</td><td>96.5</td><td>96.8</td><td>95.6</td><td>92.0</td><td>95.2</td></tr>
+                  <tr><td>Unified-VLA</td><td>Future visual states</td><td>Yes</td><td>95.4</td><td><strong>98.8</strong></td><td>93.6</td><td>94.0</td><td>95.5</td></tr>
+                  <tr class="ours"><td>OASIS</td><td>\(SE(3)\)-supervised features</td><td>No</td><td><strong>99.0</strong></td><td><strong>98.8</strong></td><td><strong>97.4</strong></td><td><strong>95.2</strong></td><td><strong>97.6</strong></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="benchmark-table">
+            <div class="table-wrap">
+              <table class="table is-fullwidth result-table">
+                <caption>CALVIN ABC\(\to\)D</caption>
+                <thead>
+                  <tr>
+                    <th>Method</th>
+                    <th>Intermediate</th>
+                    <th>Pretrain</th>
+                    <th>1</th>
+                    <th>2</th>
+                    <th>3</th>
+                    <th>4</th>
+                    <th>5</th>
+                    <th>Avg.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>SuSIE</td><td>Future visual states</td><td>Yes</td><td>87.0</td><td>69.0</td><td>49.0</td><td>38.0</td><td>26.0</td><td>2.69</td></tr>
+                  <tr><td>3D Diffuser Actor\(^{\dagger}\)</td><td>3D feature</td><td>No</td><td>93.8</td><td>80.3</td><td>66.2</td><td>53.3</td><td>41.2</td><td>3.35</td></tr>
+                  <tr><td>ReconVLA</td><td>Spatial features</td><td>Yes</td><td>95.6</td><td>87.6</td><td>76.9</td><td>69.3</td><td>64.1</td><td>3.95</td></tr>
+                  <tr><td>Seer-Large</td><td>Future visual states</td><td>Yes</td><td>96.3</td><td>91.6</td><td>86.1</td><td>80.3</td><td>74.0</td><td>4.28</td></tr>
+                  <tr><td>VPP</td><td>Future visual states</td><td>Yes</td><td>96.5</td><td>90.9</td><td>86.6</td><td>82.0</td><td>76.9</td><td>4.33</td></tr>
+                  <tr><td>Unified-VLA</td><td>Future visual states</td><td>Yes</td><td><strong>98.9</strong></td><td>94.8</td><td>89.0</td><td>82.8</td><td>75.1</td><td>4.41</td></tr>
+                  <tr><td>DreamVLA</td><td>Future visual states</td><td>Yes</td><td>98.2</td><td>94.6</td><td>89.5</td><td>83.4</td><td>78.1</td><td>4.44</td></tr>
+                  <tr class="ours"><td>OASIS</td><td>\(SE(3)\)-supervised features</td><td>No</td><td>98.1</td><td><strong>94.9</strong></td><td><strong>91.7</strong></td><td><strong>88.9</strong></td><td><strong>83.3</strong></td><td><strong>4.57</strong></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-block">
+        <figure class="paper-figure">
+          <img src="./static/images/paper/trajectory_visualization.png" alt="SE(3) trajectory prediction and robot execution visualization">
+          <figcaption>Predicted translation waypoints and rotation axes closely track the executed end-effector path.</figcaption>
+        </figure>
+      </div>
+
+      <div class="result-block">
+        <div class="section-heading">
+          <h3>Real-World Performance</h3>
+          <p>OASIS is evaluated on Franka Research 3 and Kinova Gen3 platforms across Goal, Spatial, Long, and OOD settings.</p>
+        </div>
+        <figure class="paper-figure">
+          <img src="./static/images/paper/real_world_platform.png" alt="Real-world robot platforms and tasks">
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-muted" id="demos">
+    <div class="container is-max-widescreen">
+      <h2 class="title section-title">Demos</h2>
+
+      <div class="demo-block">
+        <div class="section-heading">
+          <h3>Simulation</h3>
+        </div>
+        <h4 class="demo-subtitle">LIBERO Long</h4>
+        <div class="video-grid five-up">
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/simulation/libero/libero_long1.mp4" type="video/mp4"></video></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/simulation/libero/libero_long2.mp4" type="video/mp4"></video></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/simulation/libero/libero_long3.mp4" type="video/mp4"></video></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/simulation/libero/libero_long4.mp4" type="video/mp4"></video></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/simulation/libero/libero_long5.mp4" type="video/mp4"></video></figure>
+        </div>
+
+        <h4 class="demo-subtitle">CALVIN ABC\(\to\)D</h4>
+        <div class="video-grid five-up">
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/simulation/calvin/0.mp4" type="video/mp4"></video></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/simulation/calvin/1.mp4" type="video/mp4"></video></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/simulation/calvin/2.mp4" type="video/mp4"></video></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/simulation/calvin/3.mp4" type="video/mp4"></video></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/simulation/calvin/4.mp4" type="video/mp4"></video></figure>
+        </div>
+      </div>
+
+      <div class="demo-block">
+        <div class="section-heading">
+          <h3>Real-World Tasks</h3>
+        </div>
+        <h4 class="demo-subtitle">Goal</h4>
+        <div class="video-grid three-up">
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/real_world/Goal/banana_goal_red.mp4" type="video/mp4"></video><figcaption>Place the banana into the red bowl</figcaption></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/real_world/Goal/banana_goal_yellow_bowl.mp4" type="video/mp4"></video><figcaption>Place the banana into the yellow bowl</figcaption></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/real_world/Goal/carrot_goal_red.mp4" type="video/mp4"></video><figcaption>Place the carrot into the red bowl</figcaption></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/real_world/Goal/carrot_goal_yellow.mp4" type="video/mp4"></video><figcaption>Place the carrot into the yellow bowl</figcaption></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/real_world/Goal/orange_goal_red.mp4" type="video/mp4"></video><figcaption>Place the orange into the red bowl</figcaption></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/real_world/Goal/orange_goal_yellow.mp4" type="video/mp4"></video><figcaption>Place the orange into the yellow bowl</figcaption></figure>
+        </div>
+
+        <h4 class="demo-subtitle">Spatial</h4>
+        <div class="video-grid three-up">
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/real_world/Spatial/Stack_Cube.mp4" type="video/mp4"></video><figcaption>Stack blocks</figcaption></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/real_world/Spatial/Build_tower.mp4" type="video/mp4"></video><figcaption>Build towers</figcaption></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/real_world/Spatial/Pot.mp4" type="video/mp4"></video><figcaption>Place pots on the wooden bracket</figcaption></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/real_world/Spatial/put_orange_can_on_shelf.mp4" type="video/mp4"></video><figcaption>Put the orange can on shelves</figcaption></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/real_world/Spatial/hang_cup.mp4" type="video/mp4"></video><figcaption>Hang the cup</figcaption></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/real_world/Spatial/place_cup.mp4" type="video/mp4"></video><figcaption>Place the cup</figcaption></figure>
+        </div>
+
+        <h4 class="demo-subtitle">Long Horizon</h4>
+        <div class="video-grid single-video">
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/real_world/Long/Long_Horizon.mp4" type="video/mp4"></video><figcaption>Open the drawer and place the banana into the red bowl</figcaption></figure>
+        </div>
+      </div>
+
+      <div class="demo-block">
+        <div class="section-heading">
+          <h3>Out-of-Distribution Real-World Settings</h3>
+        </div>
+        <h4 class="demo-subtitle">Unseen Backgrounds</h4>
+        <div class="video-grid three-up">
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/real_world/OOD/background/banana_ood_background.mp4" type="video/mp4"></video><figcaption>Banana</figcaption></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/real_world/OOD/background/carrot_ood_background.mp4" type="video/mp4"></video><figcaption>Carrot</figcaption></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/real_world/OOD/background/orange_ood_background.mp4" type="video/mp4"></video><figcaption>Orange</figcaption></figure>
+        </div>
+
+        <h4 class="demo-subtitle">Human Interference and Camera Shift</h4>
+        <div class="video-grid three-up">
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/real_world/OOD/human/banana_ood_human.mp4" type="video/mp4"></video><figcaption>Human interference: banana</figcaption></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/real_world/OOD/human/orange_ood_human.mp4" type="video/mp4"></video><figcaption>Human interference: orange</figcaption></figure>
+          <figure class="video-card"><video autoplay muted loop playsinline controls><source src="./static/videos/real_world/OOD/camera/carrot_ood_camera.mp4" type="video/mp4"></video><figcaption>New camera perspective: carrot</figcaption></figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="bibtex">
+    <div class="container is-max-desktop">
+      <h2 class="title section-title">BibTeX</h2>
+      <pre class="bibtex"><code>@misc{chen2026oasisobservationactionspacealignment,
+      title={OASIS: Observation-Action Space Alignment via SE(3) Trajectory Prediction for Robotic Manipulation}, 
+      author={Xinzhe Chen and Sihua Ren and Liqi Huang and Haowen Sun and Mingyang Li and Xingyu Chen and Zeyang Liu and Xuguang Lan},
+      year={2026},
+      eprint={2605.25829},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2605.25829}, 
+}</code></pre>
+    </div>
+  </section>
+</main>
+
+<footer class="footer project-footer">
+  <div class="container is-max-desktop">
+    <p>OASIS project page. Maintained by the authors.</p>
+  </div>
+</footer>
+</body>
+</html>
